@@ -1,68 +1,82 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta charset='UTF-8'>
+        <title>Petshop: Clientes</title>
+        <link rel='stylesheet' href='css/estilo.css'>
+    </head>
 
-<head>
-    <meta charset='UTF-8'>
-    <title>Petshop: Clientes</title>
-    <link rel='stylesheet' href='css/estilo.css'>
-</head>
+    <body class="conteudo exercicio">
+        <h1>Petshop: Clientes</h1>
 
-<body class="conteudo exercicio">
-    <h1>Petshop: Clientes</h1>
+        <script>
+            function ajax(config) {
+                const xhr = new XMLHttpRequest()
+                xhr.open(config.method, config.url, true)
 
-    <script>
-        function ajax(config) {
-            const xhr = new XMLHttpRequest();
-            xhr.open(config.method, config.url, true)
-
-            xhr.onload = e => {
-                if (xhr.status === 200) {
-                    config.success(xhr.response)
-                } else if (xhr.status >= 400) {
-                    config.error({
-                        code: xhr.status,
-                        text: xhr.statusText
-                    })
+                xhr.onload = e => {
+                    if (xhr.status === 200) {
+                        config.success(xhr.response)
+                    } else if (xhr.status >= 400) {
+                        config.error({
+                            code: xhr.status,
+                            text: xhr.statusText
+                        })
+                    }
                 }
+
+                xhr.send()
             }
 
-            xhr.send()
-        }
+            function createTables(response) {
+                const keys = Object.keys(response[0])
 
-        function createStatesTable(states) {
-            const rows = states.map(state => {
-                const tdId = document.createElement("td");
-                tdId.innerHTML = state.id
-                
-                const tdName = document.createElement("td");
-                tdName.innerHTML = state.nome
+                const table = document.createElement("table")
+                const thead = document.createElement("thead")
+                const trHead = document.createElement("tr")
 
-                const tdAbbreviation = document.createElement("td");
-                tdAbbreviation.innerHTML = state.sigla
-                
-                const tr = document.createElement("tr");
-                tr.appendChild(tdId)
-                tr.appendChild(tdName)
-                tr.appendChild(tdAbbreviation)
-                return tr
+                keys.forEach(key => {
+                    const th = document.createElement("th");
+                    const headerText = key.replace("_", " ").toUpperCase()
+                    th.innerHTML = headerText
+                    trHead.appendChild(th)
+                })
 
+                thead.appendChild(trHead)
+                table.appendChild(thead)
+
+                const tbody = document.createElement("tbody")
+
+                response.forEach(obj => {
+                    const tr = document.createElement("tr")
+
+                    keys.forEach(key => {
+                        const td = document.createElement("td")
+                        td.innerHTML = obj[key]
+                        tr.appendChild(td)
+                    })
+
+                    tbody.appendChild(tr)
+                })
+
+                table.appendChild(tbody)
+
+                document.body.appendChild(table)
+            }
+
+
+            ajax({
+                url: "/dados/petshop_clientes.json",
+                method: "GET",
+                success: (res) => {
+                    const response = JSON.parse(res)
+                    createTables(response);
+                },
+                error: (err) => {
+                    const msg = document.createTextNode(`${err.code}: ${err.text}`)
+                    document.body.appendChild(msg)
+                }
             })
-            const table = document.createElement("table");
-            rows.forEach(row => table.appendChild(row));
-            document.body.appendChild(table);
-        }
-
-        ajax({
-            url: "/dados/estados.json",
-            method: "GET",
-            success: (res) => {
-                const states = JSON.parse(res)
-                createStatesTable(states);
-            },
-            error: (err) => {
-                const msg = document.createTextNode(`${err.code}: ${err.text}`)
-                document.body.appendChild(msg)
-            }
-        })
-    </script>
-</body>
+        </script>
+    </body>
+</html>
